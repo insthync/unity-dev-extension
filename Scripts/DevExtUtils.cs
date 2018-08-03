@@ -7,8 +7,11 @@ using UnityEngine;
 
 public static class DevExtUtils
 {
-    private static Dictionary<object, Type> cacheDevExtTypes = new Dictionary<object, Type>();
     private static Dictionary<string, List<MethodInfo>> cacheDevExtMethods = new Dictionary<string, List<MethodInfo>>();
+    // Optimizing garbage collection
+    private static string tempKey;
+    private static List<MethodInfo> tempMethods;
+    private static DevExtMethodsAttribute tempAttribute;
     /// <summary>
     /// This will calls all methods from `obj` that have attributes "DevExtMethodsAttribute("`baseMethodName`")" with any number of arguments that can be set via `args`
     /// </summary>
@@ -18,13 +21,7 @@ public static class DevExtUtils
     /// <param name="args"></param>
     public static void InvokeClassDevExtMethods<T>(this T obj, string baseMethodName, params object[] args) where T : class
     {
-        Type type;
-        if (!cacheDevExtTypes.TryGetValue(obj, out type))
-        {
-            type = obj.GetType();
-            cacheDevExtTypes[obj] = type;
-        }
-        InvokeDevExtMethods(type, obj, baseMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, args);
+        InvokeDevExtMethods(obj.GetType(), obj, baseMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, args);
     }
 
     /// <summary>
@@ -40,19 +37,19 @@ public static class DevExtUtils
     
     private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
     {
-        var key = new StringBuilder().Append(type.Name).Append('_').Append(baseMethodName).ToString();
-        List<MethodInfo> methods = null;
-        if (!cacheDevExtMethods.TryGetValue(key, out methods))
+        tempKey = new StringBuilder().Append(type.Name).Append('_').Append(baseMethodName).ToString();
+        tempMethods = null;
+        if (!cacheDevExtMethods.TryGetValue(tempKey, out tempMethods))
         {
-            methods = type.GetMethods(bindingFlags).Where(a =>
+            tempMethods = type.GetMethods(bindingFlags).Where(a =>
             {
-                var attribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
-                return attribute != null && attribute.BaseMethodName.Equals(baseMethodName);
+                tempAttribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
+                return tempAttribute != null && tempAttribute.BaseMethodName.Equals(baseMethodName);
             }).ToList();
-            cacheDevExtMethods[key] = methods;
+            cacheDevExtMethods[tempKey] = tempMethods;
         }
-        if (methods == null || methods.Count == 0) return;
-        foreach (var method in methods)
+        if (tempMethods == null || tempMethods.Count == 0) return;
+        foreach (var method in tempMethods)
         {
             try
             {
