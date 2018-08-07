@@ -19,7 +19,7 @@ public static class DevExtUtils
     /// <param name="obj"></param>
     /// <param name="baseMethodName"></param>
     /// <param name="args"></param>
-    public static void InvokeClassDevExtMethods<T>(this T obj, string baseMethodName, params object[] args) where T : class
+    public static void InvokeInstanceDevExtMethods<T>(this T obj, string baseMethodName, params object[] args) where T : class
     {
         InvokeDevExtMethods(obj.GetType(), obj, baseMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, args);
     }
@@ -32,7 +32,7 @@ public static class DevExtUtils
     /// <param name="args"></param>
     public static void InvokeStaticDevExtMethods(Type type, string baseMethodName, params object[] args)
     {
-        InvokeDevExtMethods(type, null, baseMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static, args);
+        InvokeDevExtMethods(type, null, baseMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, args);
     }
     
     private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
