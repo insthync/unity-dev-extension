@@ -7,10 +7,10 @@ using UnityEngine;
 
 public static class DevExtUtils
 {
-    private static Dictionary<string, List<MethodInfo>> cacheDevExtMethods = new Dictionary<string, List<MethodInfo>>();
+    private static readonly Dictionary<Type, Dictionary<string, MethodInfo[]>> cacheDevExtMethods = new Dictionary<Type, Dictionary<string, MethodInfo[]>>();
     // Optimizing garbage collection
-    private static string tempKey;
-    private static List<MethodInfo> tempMethods;
+    private static MethodInfo[] tempMethods;
+    private static int tempLoopCounter;
     private static DevExtMethodsAttribute tempAttribute;
     /// <summary>
     /// This will calls all methods from `obj` that have attributes "DevExtMethodsAttribute("`baseMethodName`")" with any number of arguments that can be set via `args`
@@ -37,23 +37,23 @@ public static class DevExtUtils
     
     private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
     {
-        tempKey = new StringBuilder().Append(type.Name).Append('_').Append(baseMethodName).ToString();
-        tempMethods = null;
-        if (!cacheDevExtMethods.TryGetValue(tempKey, out tempMethods))
+        if (!cacheDevExtMethods.ContainsKey(type))
         {
+            cacheDevExtMethods[type] = new Dictionary<string, MethodInfo[]>();
             tempMethods = type.GetMethods(bindingFlags).Where(a =>
             {
                 tempAttribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
                 return tempAttribute != null && tempAttribute.BaseMethodName.Equals(baseMethodName);
-            }).ToList();
-            cacheDevExtMethods[tempKey] = tempMethods;
+            }).ToArray();
+            if (tempMethods != null && tempMethods.Length > 0)
+                cacheDevExtMethods[type][baseMethodName] = tempMethods;
         }
-        if (tempMethods == null || tempMethods.Count == 0) return;
-        foreach (var method in tempMethods)
+        if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods)) return;
+        for (tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
         {
             try
             {
-                method.Invoke(obj, args);
+                tempMethods[tempLoopCounter].Invoke(obj, args);
             }
             catch (Exception ex)
             {
