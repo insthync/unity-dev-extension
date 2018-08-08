@@ -12,6 +12,8 @@ public static class DevExtUtils
     private static MethodInfo[] tempMethods;
     private static int tempLoopCounter;
     private static DevExtMethodsAttribute tempAttribute;
+    private const BindingFlags InstanceMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
+    private const BindingFlags StaticMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
     /// <summary>
     /// This will calls all methods from `obj` that have attributes "DevExtMethodsAttribute("`baseMethodName`")" with any number of arguments that can be set via `args`
     /// </summary>
@@ -21,7 +23,7 @@ public static class DevExtUtils
     /// <param name="args"></param>
     public static void InvokeInstanceDevExtMethods<T>(this T obj, string baseMethodName, params object[] args) where T : class
     {
-        InvokeDevExtMethods(obj.GetType(), obj, baseMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance, args);
+        InvokeDevExtMethods(obj.GetType(), obj, baseMethodName, InstanceMethodBindingFlags, args);
     }
 
     /// <summary>
@@ -32,7 +34,7 @@ public static class DevExtUtils
     /// <param name="args"></param>
     public static void InvokeStaticDevExtMethods(Type type, string baseMethodName, params object[] args)
     {
-        InvokeDevExtMethods(type, null, baseMethodName, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static, args);
+        InvokeDevExtMethods(type, null, baseMethodName, StaticMethodBindingFlags, args);
     }
     
     private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
