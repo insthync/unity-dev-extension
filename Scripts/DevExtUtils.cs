@@ -41,7 +41,9 @@ public static class DevExtUtils
     {
         if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
         {
-            cacheDevExtMethods[type] = new Dictionary<string, MethodInfo[]>();
+            if (!cacheDevExtMethods.ContainsKey(type))
+                cacheDevExtMethods.Add(type, new Dictionary<string, MethodInfo[]>());
+            cacheDevExtMethods[type].Add(baseMethodName, null);
             tempMethods = type.GetMethods(bindingFlags).Where(a =>
             {
                 tempAttribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
@@ -50,7 +52,7 @@ public static class DevExtUtils
             if (tempMethods != null && tempMethods.Length > 0)
                 cacheDevExtMethods[type][baseMethodName] = tempMethods;
         }
-        if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods)) return;
+        if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0) return;
         for (tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
         {
             try
