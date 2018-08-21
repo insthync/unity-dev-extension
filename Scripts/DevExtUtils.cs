@@ -39,7 +39,7 @@ public static class DevExtUtils
     
     private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
     {
-        if (!cacheDevExtMethods.ContainsKey(type))
+        if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
         {
             cacheDevExtMethods[type] = new Dictionary<string, MethodInfo[]>();
             tempMethods = type.GetMethods(bindingFlags).Where(a =>
