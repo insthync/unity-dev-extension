@@ -23,6 +23,8 @@ public static class DevExtUtils
     /// <param name="args"></param>
     public static void InvokeInstanceDevExtMethods<T>(this T obj, string baseMethodName, params object[] args) where T : class
     {
+        if (obj == null)
+            return;
         InvokeDevExtMethods(obj.GetType(), obj, baseMethodName, InstanceMethodBindingFlags, args);
     }
 
@@ -39,6 +41,8 @@ public static class DevExtUtils
 
     private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
     {
+        if (obj == null)
+            return;
         try
         {
             if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
