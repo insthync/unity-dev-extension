@@ -21,11 +21,18 @@ public static class DevExtUtils
     /// <param name="obj"></param>
     /// <param name="baseMethodName"></param>
     /// <param name="args"></param>
-    public static void InvokeInstanceDevExtMethods<T>(this T obj, string baseMethodName, params object[] args) where T : class
+    public static void InvokeInstanceDevExtMethods<T>(this T obj, string baseMethodName, params object[] args)
     {
         if (obj == null)
             return;
         InvokeDevExtMethods(obj.GetType(), obj, baseMethodName, InstanceMethodBindingFlags, args);
+    }
+
+    public static T InvokeInstanceDevExtMethodsLoopItself<T>(this T obj, string baseMethodName, params object[] args)
+    {
+        if (obj == null)
+            return default(T);
+        return InvokeDevExtMethodsLoopItself<T>(obj.GetType(), obj, baseMethodName, InstanceMethodBindingFlags, args);
     }
 
     /// <summary>
@@ -58,15 +65,49 @@ public static class DevExtUtils
                 if (tempMethods != null && tempMethods.Length > 0)
                     cacheDevExtMethods[type][baseMethodName] = tempMethods;
             }
-            if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0) return;
+            if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
+                return;
             for (tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
             {
-                tempMethods[tempLoopCounter].Invoke(obj, args);
+                obj = tempMethods[tempLoopCounter].Invoke(obj, args);
             }
         }
         catch (Exception ex)
         {
             Debug.LogException(ex);
         }
+    }
+
+    private static T InvokeDevExtMethodsLoopItself<T>(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
+    {
+        if (obj == null)
+            return default(T);
+        try
+        {
+            if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
+            {
+                if (!cacheDevExtMethods.ContainsKey(type))
+                    cacheDevExtMethods.Add(type, new Dictionary<string, MethodInfo[]>());
+                cacheDevExtMethods[type].Add(baseMethodName, null);
+                tempMethods = type.GetMethods(bindingFlags).Where(a =>
+                {
+                    tempAttribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
+                    return tempAttribute != null && tempAttribute.BaseMethodName.Equals(baseMethodName);
+                }).ToArray();
+                if (tempMethods != null && tempMethods.Length > 0)
+                    cacheDevExtMethods[type][baseMethodName] = tempMethods;
+            }
+            if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
+                return (T)obj;
+            for (tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
+            {
+                obj = tempMethods[tempLoopCounter].Invoke(obj, args);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogException(ex);
+        }
+        return (T)obj;
     }
 }
