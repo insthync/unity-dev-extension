@@ -48,8 +48,6 @@ public static class DevExtUtils
 
     private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
     {
-        if (obj == null)
-            return;
         try
         {
             if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
@@ -80,8 +78,6 @@ public static class DevExtUtils
 
     private static T InvokeDevExtMethodsLoopItself<T>(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
     {
-        if (obj == null)
-            return default(T);
         try
         {
             if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
