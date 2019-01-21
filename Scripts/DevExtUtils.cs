@@ -69,7 +69,7 @@ public static class DevExtUtils
                 return;
             for (tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
             {
-                obj = tempMethods[tempLoopCounter].Invoke(obj, args);
+                tempMethods[tempLoopCounter].Invoke(obj, args);
             }
         }
         catch (Exception ex)
