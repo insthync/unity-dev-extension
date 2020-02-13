@@ -8,10 +8,6 @@ using UnityEngine;
 public static class DevExtUtils
 {
     private static readonly Dictionary<Type, Dictionary<string, MethodInfo[]>> cacheDevExtMethods = new Dictionary<Type, Dictionary<string, MethodInfo[]>>();
-    // Optimizing garbage collection
-    private static MethodInfo[] tempMethods;
-    private static int tempLoopCounter;
-    private static DevExtMethodsAttribute tempAttribute;
     private const BindingFlags InstanceMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
     private const BindingFlags StaticMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
     /// <summary>
@@ -48,6 +44,8 @@ public static class DevExtUtils
 
     private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
     {
+        MethodInfo[] tempMethods;
+        DevExtMethodsAttribute tempAttribute;
         try
         {
             if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
@@ -64,7 +62,7 @@ public static class DevExtUtils
             }
             if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
                 return;
-            for (tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
+            for (int tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
             {
                 tempMethods[tempLoopCounter].Invoke(obj, args);
             }
@@ -77,6 +75,8 @@ public static class DevExtUtils
 
     private static object InvokeDevExtMethodsLoopItself(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
     {
+        MethodInfo[] tempMethods;
+        DevExtMethodsAttribute tempAttribute;
         try
         {
             if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
@@ -93,7 +93,7 @@ public static class DevExtUtils
             }
             if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
                 return obj;
-            for (tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
+            for (int tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
             {
                 obj = tempMethods[tempLoopCounter].Invoke(obj, args);
             }
