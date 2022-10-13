@@ -7,7 +7,7 @@ using UnityEngine;
 
 public static class DevExtUtils
 {
-    private static readonly Dictionary<Type, Dictionary<string, MethodInfo[]>> cacheDevExtMethods = new Dictionary<Type, Dictionary<string, MethodInfo[]>>();
+    private static readonly Dictionary<Type, Dictionary<string, MethodInfo[]>> s_cacheDevExtMethods = new Dictionary<Type, Dictionary<string, MethodInfo[]>>();
     private const BindingFlags InstanceMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
     private const BindingFlags StaticMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
     /// <summary>
@@ -48,19 +48,19 @@ public static class DevExtUtils
         DevExtMethodsAttribute tempAttribute;
         try
         {
-            if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
+            if (!s_cacheDevExtMethods.ContainsKey(type) || !s_cacheDevExtMethods[type].ContainsKey(baseMethodName))
             {
-                if (!cacheDevExtMethods.ContainsKey(type))
-                    cacheDevExtMethods.Add(type, new Dictionary<string, MethodInfo[]>());
-                cacheDevExtMethods[type].Add(baseMethodName, null);
+                if (!s_cacheDevExtMethods.ContainsKey(type))
+                    s_cacheDevExtMethods.Add(type, new Dictionary<string, MethodInfo[]>());
+                s_cacheDevExtMethods[type].Add(baseMethodName, null);
                 tempMethods = type.GetMethods(bindingFlags).Where(a =>
                 {
                     tempAttribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
                     return tempAttribute != null && tempAttribute.BaseMethodName.Equals(baseMethodName);
                 }).ToArray();
-                cacheDevExtMethods[type][baseMethodName] = tempMethods;
+                s_cacheDevExtMethods[type][baseMethodName] = tempMethods;
             }
-            if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
+            if (!s_cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
                 return;
             for (int tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
             {
@@ -79,19 +79,19 @@ public static class DevExtUtils
         DevExtMethodsAttribute tempAttribute;
         try
         {
-            if (!cacheDevExtMethods.ContainsKey(type) || !cacheDevExtMethods[type].ContainsKey(baseMethodName))
+            if (!s_cacheDevExtMethods.ContainsKey(type) || !s_cacheDevExtMethods[type].ContainsKey(baseMethodName))
             {
-                if (!cacheDevExtMethods.ContainsKey(type))
-                    cacheDevExtMethods.Add(type, new Dictionary<string, MethodInfo[]>());
-                cacheDevExtMethods[type].Add(baseMethodName, null);
+                if (!s_cacheDevExtMethods.ContainsKey(type))
+                    s_cacheDevExtMethods.Add(type, new Dictionary<string, MethodInfo[]>());
+                s_cacheDevExtMethods[type].Add(baseMethodName, null);
                 tempMethods = type.GetMethods(bindingFlags).Where(a =>
                 {
                     tempAttribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
                     return tempAttribute != null && tempAttribute.BaseMethodName.Equals(baseMethodName);
                 }).ToArray();
-                cacheDevExtMethods[type][baseMethodName] = tempMethods;
+                s_cacheDevExtMethods[type][baseMethodName] = tempMethods;
             }
-            if (!cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
+            if (!s_cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
                 return obj;
             for (int tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
             {
