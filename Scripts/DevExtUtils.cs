@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+#if UNITY_2019_OR_NEWER
 using UnityEngine;
+#endif
 
 public static class DevExtUtils
 {
@@ -69,7 +71,9 @@ public static class DevExtUtils
         }
         catch (Exception ex)
         {
+#if UNITY_2019_OR_NEWER
             Debug.LogException(ex);
+#endif
         }
     }
 
@@ -100,7 +104,9 @@ public static class DevExtUtils
         }
         catch (Exception ex)
         {
+#if UNITY_2019_OR_NEWER
             Debug.LogException(ex);
+#endif
         }
         return obj;
     }
