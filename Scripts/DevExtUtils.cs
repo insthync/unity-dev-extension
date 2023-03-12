@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-#if UNITY_2019_OR_NEWER
+#if !NET && !NETCOREAPP
 using UnityEngine;
 #endif
 
@@ -71,7 +71,7 @@ public static class DevExtUtils
         }
         catch (Exception ex)
         {
-#if UNITY_2019_OR_NEWER
+#if !NET && !NETCOREAPP
             Debug.LogException(ex);
 #endif
         }
@@ -104,7 +104,7 @@ public static class DevExtUtils
         }
         catch (Exception ex)
         {
-#if UNITY_2019_OR_NEWER
+#if !NET && !NETCOREAPP
             Debug.LogException(ex);
 #endif
         }
