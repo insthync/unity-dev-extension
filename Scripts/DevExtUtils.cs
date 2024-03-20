@@ -71,7 +71,9 @@ public static class DevExtUtils
         }
         catch (Exception ex)
         {
-#if !NET && !NETCOREAPP
+#if NET || NETCOREAPP
+            Console.WriteLine(ex.ToString());
+#else
             Debug.LogException(ex);
 #endif
         }
@@ -104,7 +106,9 @@ public static class DevExtUtils
         }
         catch (Exception ex)
         {
-#if !NET && !NETCOREAPP
+#if NET || NETCOREAPP
+            Console.WriteLine(ex.ToString());
+#else
             Debug.LogException(ex);
 #endif
         }
