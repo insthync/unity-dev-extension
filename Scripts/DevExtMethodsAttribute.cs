@@ -1,11 +1,14 @@
 ﻿using System;
 
-[AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
-public class DevExtMethodsAttribute : Attribute
+namespace Insthync.DevExtension
 {
-    public string BaseMethodName { get; private set; }
-    public DevExtMethodsAttribute(string baseMethodName)
+    [AttributeUsage(AttributeTargets.Method, AllowMultiple = false, Inherited = true)]
+    public class DevExtMethodsAttribute : Attribute
     {
-        BaseMethodName = baseMethodName;
+        public string BaseMethodName { get; private set; }
+        public DevExtMethodsAttribute(string baseMethodName)
+        {
+            BaseMethodName = baseMethodName;
+        }
     }
 }
