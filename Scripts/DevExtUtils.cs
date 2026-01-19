@@ -62,9 +62,8 @@ namespace Insthync.DevExtension
                 }).ToArray();
                 s_cacheDevExtMethods[typeName][baseMethodName] = methods;
             }
-            if (!s_cacheDevExtMethods[typeName].TryGetValue(baseMethodName, out methods) || methods == null || methods.Length == 0)
-                return false;
-            return true;
+            methods = s_cacheDevExtMethods[typeName][baseMethodName];
+            return methods != null && methods.Length > 0;
         }
 
         private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
