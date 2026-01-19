@@ -10,7 +10,7 @@ namespace Insthync.DevExtension
 {
     public static class DevExtUtils
     {
-        private static readonly Dictionary<Type, Dictionary<string, MethodInfo[]>> s_cacheDevExtMethods = new Dictionary<Type, Dictionary<string, MethodInfo[]>>();
+        private static readonly Dictionary<string, Dictionary<string, MethodInfo[]>> s_cacheDevExtMethods = new Dictionary<string, Dictionary<string, MethodInfo[]>>();
         private const BindingFlags InstanceMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         private const BindingFlags StaticMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
         /// <summary>
@@ -45,29 +45,38 @@ namespace Insthync.DevExtension
             InvokeDevExtMethods(type, null, baseMethodName, StaticMethodBindingFlags, args);
         }
 
+        private static bool TryGetDevExtMethods(Type type, string baseMethodName, BindingFlags bindingFlags, out MethodInfo[] methods)
+        {
+            methods = null;
+            DevExtMethodsAttribute tempAttribute;
+            string typeName = type.FullName;
+            if (!s_cacheDevExtMethods.ContainsKey(typeName) || !s_cacheDevExtMethods[typeName].ContainsKey(baseMethodName))
+            {
+                if (!s_cacheDevExtMethods.ContainsKey(typeName))
+                    s_cacheDevExtMethods.Add(typeName, new Dictionary<string, MethodInfo[]>());
+                s_cacheDevExtMethods[typeName].Add(baseMethodName, null);
+                methods = type.GetMethods(bindingFlags).Where(a =>
+                {
+                    tempAttribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
+                    return tempAttribute != null && tempAttribute.BaseMethodName.Equals(baseMethodName);
+                }).ToArray();
+                s_cacheDevExtMethods[typeName][baseMethodName] = methods;
+            }
+            if (!s_cacheDevExtMethods[typeName].TryGetValue(baseMethodName, out methods) || methods == null || methods.Length == 0)
+                return false;
+            return true;
+        }
+
         private static void InvokeDevExtMethods(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
         {
-            MethodInfo[] tempMethods;
-            DevExtMethodsAttribute tempAttribute;
             try
             {
-                if (!s_cacheDevExtMethods.ContainsKey(type) || !s_cacheDevExtMethods[type].ContainsKey(baseMethodName))
-                {
-                    if (!s_cacheDevExtMethods.ContainsKey(type))
-                        s_cacheDevExtMethods.Add(type, new Dictionary<string, MethodInfo[]>());
-                    s_cacheDevExtMethods[type].Add(baseMethodName, null);
-                    tempMethods = type.GetMethods(bindingFlags).Where(a =>
-                    {
-                        tempAttribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
-                        return tempAttribute != null && tempAttribute.BaseMethodName.Equals(baseMethodName);
-                    }).ToArray();
-                    s_cacheDevExtMethods[type][baseMethodName] = tempMethods;
-                }
-                if (!s_cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
+                if (!TryGetDevExtMethods(type, baseMethodName, bindingFlags, out MethodInfo[] methods))
                     return;
-                for (int tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
+
+                for (int tempLoopCounter = 0; tempLoopCounter < methods.Length; ++tempLoopCounter)
                 {
-                    tempMethods[tempLoopCounter].Invoke(obj, args);
+                    methods[tempLoopCounter].Invoke(obj, args);
                 }
             }
             catch (Exception ex)
@@ -82,27 +91,14 @@ namespace Insthync.DevExtension
 
         private static object InvokeDevExtMethodsLoopItself(Type type, object obj, string baseMethodName, BindingFlags bindingFlags, params object[] args)
         {
-            MethodInfo[] tempMethods;
-            DevExtMethodsAttribute tempAttribute;
             try
             {
-                if (!s_cacheDevExtMethods.ContainsKey(type) || !s_cacheDevExtMethods[type].ContainsKey(baseMethodName))
-                {
-                    if (!s_cacheDevExtMethods.ContainsKey(type))
-                        s_cacheDevExtMethods.Add(type, new Dictionary<string, MethodInfo[]>());
-                    s_cacheDevExtMethods[type].Add(baseMethodName, null);
-                    tempMethods = type.GetMethods(bindingFlags).Where(a =>
-                    {
-                        tempAttribute = (DevExtMethodsAttribute)a.GetCustomAttribute(typeof(DevExtMethodsAttribute), true);
-                        return tempAttribute != null && tempAttribute.BaseMethodName.Equals(baseMethodName);
-                    }).ToArray();
-                    s_cacheDevExtMethods[type][baseMethodName] = tempMethods;
-                }
-                if (!s_cacheDevExtMethods[type].TryGetValue(baseMethodName, out tempMethods) || tempMethods == null || tempMethods.Length == 0)
+                if (!TryGetDevExtMethods(type, baseMethodName, bindingFlags, out MethodInfo[] methods))
                     return obj;
-                for (int tempLoopCounter = 0; tempLoopCounter < tempMethods.Length; ++tempLoopCounter)
+
+                for (int tempLoopCounter = 0; tempLoopCounter < methods.Length; ++tempLoopCounter)
                 {
-                    obj = tempMethods[tempLoopCounter].Invoke(obj, args);
+                    obj = methods[tempLoopCounter].Invoke(obj, args);
                 }
             }
             catch (Exception ex)
