@@ -46,7 +46,7 @@ namespace Insthync.DevExtension
             InvokeDevExtMethods(type, null, baseMethodName, StaticMethodBindingFlags, args);
         }
 
-        private static bool TryGetDevExtMethods(Type type, string baseMethodName, BindingFlags bindingFlags, out MethodInfo[] methods)
+        public static bool TryGetDevExtMethods(Type type, string baseMethodName, BindingFlags bindingFlags, out MethodInfo[] methods)
         {
             methods = null;
             string typeName = type.FullName;
