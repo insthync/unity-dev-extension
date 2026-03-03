@@ -46,6 +46,16 @@ namespace Insthync.DevExtension
             InvokeDevExtMethods(type, null, baseMethodName, StaticMethodBindingFlags, args);
         }
 
+        public static void CacheInstanceDevExtMethods(Type type, string baseMethodName)
+        {
+            TryGetDevExtMethods(type, baseMethodName, InstanceMethodBindingFlags, out _);
+        }
+
+        public static void CacheStaticDevExtMethods(Type type, string baseMethodName)
+        {
+            TryGetDevExtMethods(type, baseMethodName, StaticMethodBindingFlags, out _);
+        }
+
         public static bool TryGetDevExtMethods(Type type, string baseMethodName, BindingFlags bindingFlags, out MethodInfo[] methods)
         {
             methods = null;
