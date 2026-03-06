@@ -11,7 +11,7 @@ namespace Insthync.DevExtension
 {
     public static class DevExtUtils
     {
-        private static readonly Dictionary<string, Dictionary<string, MethodInfo[]>> s_cacheDevExtMethods = new Dictionary<string, Dictionary<string, MethodInfo[]>>();
+        private static readonly Dictionary<RuntimeTypeHandle, Dictionary<string, MethodInfo[]>> s_cacheDevExtMethods = new Dictionary<RuntimeTypeHandle, Dictionary<string, MethodInfo[]>>();
         private const BindingFlags InstanceMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance;
         private const BindingFlags StaticMethodBindingFlags = BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;
         /// <summary>
@@ -59,12 +59,12 @@ namespace Insthync.DevExtension
         public static bool TryGetDevExtMethods(Type type, string baseMethodName, BindingFlags bindingFlags, out MethodInfo[] methods)
         {
             methods = null;
-            string typeName = type.FullName;
+            RuntimeTypeHandle typeHandle = type.TypeHandle;
 
-            if (!s_cacheDevExtMethods.TryGetValue(typeName, out var methodDict))
+            if (!s_cacheDevExtMethods.TryGetValue(typeHandle, out var methodDict))
             {
                 methodDict = new Dictionary<string, MethodInfo[]>();
-                s_cacheDevExtMethods[typeName] = methodDict;
+                s_cacheDevExtMethods[typeHandle] = methodDict;
             }
 
             if (!methodDict.TryGetValue(baseMethodName, out methods))
